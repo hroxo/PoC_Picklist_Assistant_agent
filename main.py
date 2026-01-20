@@ -3,6 +3,8 @@ from agent.brain import agent
 from processor.searcher import cross_w_picklist
 import sys
 import time
+import os
+from dotenv import load_dotenv
 
 
 def main() -> None:
@@ -17,6 +19,15 @@ def main() -> None:
     5. Cross-references the agent's output with the picklist.
     6. Prints the results and processing latency.
     """
+
+    load_dotenv()
+    prompt_path = os.getenv("PROMPT")
+    if prompt_path is None:
+        print("Error\nMake sure you have the correct path to the Prompt in your .env file")
+        return
+    else:
+        str(prompt_path)
+    print("Path to PROMPT [✅]")
 
     try:
         path: str = sys.argv[1]
@@ -53,10 +64,11 @@ def main() -> None:
             try:
                 agent_output = agent(image_read,
                                      agent_model='gemini-3-flash-preview',
-                                     prompt='agent/prompt/few_shot.txt')
+                                     prompt=prompt_path)
                 break
             except Exception as e:
-                print(f"Error {e}\nTrying agian")
+                print(f"Error {e}\nTrying again")
+                time.sleep(1)
 
     if agent_output is None:
         print('{"fruit": "NA", "PLU": "NA", "Price": "NA"}')
