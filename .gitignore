@@ -1,0 +1,8 @@
+# Virtual Enviorment
+.venv/
+
+# Env keys
+.env
+
+# Directoria com Imagens teste
+test/

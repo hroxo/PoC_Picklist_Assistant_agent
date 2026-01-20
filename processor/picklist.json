@@ -1,0 +1,62 @@
+[
+  {
+    "fruit": "Abacate Hass",
+    "PLU": 15851,
+    "Price": 2.0
+  },
+  {
+    "fruit": "Banana",
+    "PLU": 15982,
+    "Price": 1.2
+  },
+  {
+    "fruit": "Banana Madeira",
+    "PLU": 23175,
+    "Price": 1.9
+  },
+  {
+    "fruit": "Batata Vermelha",
+    "PLU": 50388,
+    "Price": 0.8
+  },
+  {
+    "fruit": "Kiwi",
+    "PLU": 50719,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Laranja",
+    "PLU": 51137,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Maca Gala",
+    "PLU": 51146,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Maca Golden",
+    "PLU": 50716,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Maca Pink Lady",
+    "PLU": 51201,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Roma",
+    "PLU": 15915,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Tomate Cacho",
+    "PLU": 15820,
+    "Price": 0.85
+  },
+  {
+    "fruit": "Toranja Vermelha",
+    "PLU": 15920,
+    "Price": 15920
+  }
+]
