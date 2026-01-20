@@ -1,8 +1,22 @@
-# Virtual Enviorment
+# --- Python & Compilação ---
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# --- Virtual Environments (Vários nomes comuns) ---
 .venv/
 
-# Env keys
+# --- Variáveis de Ambiente (SEGURANÇA) ---
 .env
 
-# Directoria com Imagens teste
+# --- Teus Dados e Testes ---
 test/
+samples/*
+
+# --- Lixo do Sistema Operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Configurações do Editor ---
+.vscode/
+.idea/
