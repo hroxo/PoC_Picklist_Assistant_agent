@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="upload-icon">📷</div>
+    <h1>Smart Scale</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 30px;">Place your item on the scale (Simulate by uploading an image)</p>
+    
+    <form action="{% url 'classify' %}" method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        <label class="btn file-input-wrapper">
+            Choose Image
+            <input type="file" name="image" accept="image/*" onchange="document.getElementById('uploadForm').submit();">
+        </label>
+        
+        <!-- Loading indicator hidden by default -->
+        <div id="loading" style="display:none; margin-top: 20px;">
+            <p>Identifying product...</p>
+        </div>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelector('input[type="file"]').addEventListener('change', function() {
+        document.getElementById('loading').style.display = 'block';
+        document.querySelector('.btn').style.display = 'none';
+    });
+</script>
+{% endblock %}

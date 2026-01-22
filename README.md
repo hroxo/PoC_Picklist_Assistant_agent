@@ -1,97 +1,112 @@
-# Agente de Reconhecimento Visual de Produtos Frescos
+# Balança Inteligente (Smart Scale) - Documentação Técnica
 
-## 📋 Visão Geral do Projeto
+## 📋 Visão Geral do Sistema
 
-Este projeto consiste num agente inteligente desenvolvido em Python, concebido para automatizar a identificação e inventariação de produtos frescos (frutas e vegetais). O sistema monitoriza uma diretoria específica em tempo real, deteta a entrada de novas imagens, processa-as utilizando um Modelo de Linguagem Multimodal (Google Gemini) e cruza a previsão obtida com uma base de dados local (`picklist.json`).
+Este repositório contém o código-fonte para a "Balança Inteligente", uma aplicação que simula um sistema de pesagem e faturação automática para retalho alimentar. O sistema utiliza **Visão Computacional** e **Inteligência Artificial Generativa** para identificar frutas e vegetais a partir de imagens, cruzando essa identificação com uma base de dados local de produtos.
 
-O objetivo principal é demonstrar a capacidade de modelos de IA generativa na classificação visual de artigos perecíveis e na sua correta correspondência com um inventário fictício.
-
-## 🚀 Arquitetura e Tecnologias
-
-O projeto segue uma arquitetura modular, separando a lógica de monitorização de ficheiros, a interação com a IA e o processamento de dados.
-
-**Stack Tecnológica:**
-*   **Linguagem:** Python 3.12+
-*   **IA Generativa:** Google Gemini API (Modelo `gemini-3-flash-preview` ou `gemini-2.0-flash` para baixa latência).
-*   **Gestão de Ambiente:** `python-dotenv` para segurança de chaves de API.
-*   **Estrutura de Dados:** JSON para persistência de dados do inventário.
+A solução está dividida em duas componentes arquiteturais principais:
+1.  **Core (Backend Lógico):** Serviços Python puros responsáveis pela lógica de negócio, integração com IA e gestão de dados.
+2.  **Interface (Frontend/Web):** Uma aplicação Web desenvolvida em **Django** que fornece a interface de utilizador (UI) para interação com o operador/cliente.
 
 ---
 
-## 🛠️ Documentação Técnica dos Módulos
+## 🏗️ Arquitetura do Sistema
 
-Abaixo descreve-se a funcionalidade técnica de cada componente do sistema.
+O sistema segue uma arquitetura modular, promovendo a separação de responsabilidades. O diagrama abaixo ilustra o fluxo de dados:
 
-### 1. `main.py` - O Orquestrador
-Este é o ponto de entrada da aplicação. Gere o fluxo de execução síncrono.
-*   **Inicialização:** Carrega o ficheiro de inventário (`processor/picklist.json`) para memória.
-*   **Monitorização:** Instancia a classe `FileHandler` para vigiar a diretoria fornecida via argumento de linha de comandos (CLI).
-*   **Fluxo de Processamento:**
-    1.  Aguarda detetar uma nova imagem na diretoria alvo.
-    2.  Lê os *bytes* da imagem.
-    3.  Envia os dados para o módulo `brain.py` para inferência.
-    4.  Recebe a classificação e invoca `cross_w_picklist` para validar a existência do produto.
-    5.  Calcula e apresenta a latência total do processo (`time.perf_counter`).
+```
+[ Interface Web (Django) ]  <--->  [ Camada de Serviços (Core) ]  <--->  [ API Externa (Google Gemini) ]
+        ^                                       ^
+        |                                       |
+  [ Upload de Imagem ]                   [ Base de Dados JSON ]
+```
 
-### 2. `agent/brain.py` - O Cérebro (Integração LLM)
-Responsável pela comunicação com a API da Google GenAI.
+### Estrutura de Diretorias
 
-*   **Método `agent(image_bytes, agent_model, prompt)`:**
-    *   **Entrada:** Recebe a imagem em bytes brutos e define o modelo (padrão: `gemini-3-flash-preview`).
-    *   **Prompting:** Carrega um prompt "Few-Shot" (`few_shot.txt`) que instrui o modelo a responder estritamente em formato JSON, fornecendo exemplos de classificação correta.
-    *   **Execução:** Utiliza a biblioteca `google.genai` para enviar um pedido multimodal (Imagem + Texto).
-    *   **Saída:** Retorna uma *string* contendo a resposta do modelo (idealmente um JSON com campos como `fruit`, `PLU`, `Price`).
-    *   **Tratamento de Erros:** Inclui sanitização básica da resposta (substituição de plicas por aspas duplas) para garantir um *parsing* JSON válido.
+A organização do projeto reflete esta separação arquitetural:
 
-### 3. `processor/FileHandler.py` - Gestor de Ficheiros
-Implementa a lógica de observação do sistema de ficheiros (File System Watcher).
+```
+/ (Raiz do Projeto)
+├── app/                        # NÚCLEO LÓGICO (CORE)
+│   ├── data/                   # Armazenamento de dados estáticos
+│   │   └── picklist.json       # Base de dados de produtos (Inventário)
+│   ├── src/                    # Código fonte dos serviços de backend
+│   │   ├── services/           # Lógica de negócio (IA, Matching, Ficheiros)
+│   │   ├── repositories/       # Acesso a dados (Leitura do JSON)
+│   │   └── models/             # Definições de objetos de dados
+│   └── prompts/                # Instruções de sistema para o modelo de IA
+│
+├── smart_scale/                # CONFIGURAÇÃO DJANGO
+│   ├── settings.py             # Definições globais (Apps, Templates, BD)
+│   └── urls.py                 # Rotas principais (URL Dispatcher)
+│
+├── scale_ui/                   # APLICAÇÃO WEB (UI)
+│   ├── views.py                # Controladores: Ligação entre HTML e Core
+│   └── urls.py                 # Rotas específicas da interface
+│
+├── templates/                  # CAMADA DE APRESENTAÇÃO (HTML)
+│   ├── base.html               # Layout mestre (Estilos e Estrutura)
+│   ├── home.html               # Ecrã de Repouso / Upload
+│   └── result.html             # Ecrã de Resultado / Erro
+│
+├── requirements.txt            # Dependências do projeto
+└── manage.py                   # Utilitário de gestão Django
+```
 
-*   **Classe `FileHandler`:**
-    *   **`__init__(dir)`:** Verifica se a diretoria alvo existe; se não, cria-a automaticamente (`os.makedirs`), garantindo a robustez do ambiente de execução.
-    *   **`watch_dir()`:** Implementa um ciclo de *polling* (verificação contínua) com um intervalo de 1 segundo (`time.sleep(1)`). Utiliza a teoria de conjuntos (`novos_ficheiros = ficheiros_atuais - ficheiros_anteriores`) para identificar de forma eficiente ficheiros recém-adicionados, retornando o caminho absoluto da nova imagem.
-    
-    > **Nota Técnica:** Optou-se por *polling* simples em vez de bibliotecas baseadas em eventos do kernel (como `inotify` ou `watchdog`) para manter as dependências mínimas e a portabilidade do código, dado o escopo do projeto.
+## 🛠️ Detalhes Técnicos dos Componentes
 
-### 4. `processor/searcher.py` - Motor de Busca
-Responsável pela lógica de correspondência de dados (Data Matching).
+### 1. Camada de Apresentação (`scale_ui`)
+Desenvolvida em **Django**, esta camada gere o ciclo de vida HTTP.
+*   **`views.py`**: Interceta o upload da imagem, converte-a em *bytes* e orquestra as chamadas aos serviços do Core. Implementa lógica de repetição (*retry logic*) para garantir robustez na comunicação com a IA.
 
-*   **Método `cross_w_picklist(picklist, agent_output)`:**
-    *   **Parsing:** Converte as strings de entrada (tanto o inventário como a resposta da IA) em dicionários Python (`json.loads`).
-    *   **Algoritmo de Busca:** Itera sobre a lista de inventário e verifica se o nome da fruta detetada pela IA está contido no nome do artigo do inventário (`in` operator), ignorando diferenças de maiúsculas/minúsculas (`.lower()`).
-    *   **Justificação:** Esta abordagem de "string containment" permite lidar com variações linguísticas (ex: IA deteta "Maçã Gala" e o inventário tem "Maçã Gala Importada").
+### 2. Serviço de Inteligência Artificial (`AIService`)
+*Localização: `app/src/services/ai_service.py`*
+*   Utiliza a API **Google Gemini** para análise visual.
+*   Envia a imagem binária e um *prompt* de sistema (`instruction_heavy.txt`) que instrui o modelo a retornar dados estruturados (JSON).
+
+### 3. Serviço de Correspondência (`MatchingService`)
+*Localização: `app/src/services/matching_service.py`*
+*   Recebe a saída "bruta" da IA e normaliza os dados.
+*   Executa algoritmos de pesquisa textual para encontrar o produto correspondente no ficheiro `picklist.json`.
+*   Possui capacidade de **Refinamento**: Se existirem múltiplos candidatos (ex: várias qualidades de maçã), pode solicitar à IA uma segunda análise para desambiguação.
+
+### 4. Repositório de Dados (`PicklistRepository`)
+*Localização: `app/src/repositories/picklist_repository.py`*
+*   Abstrai o acesso ao ficheiro `picklist.json`. Garante que a aplicação trabalha com objetos Python tipados (`Product`) em vez de dicionários genéricos.
 
 ---
 
-## 📦 Instalação e Utilização
+## 🚀 Instalação e Execução
 
 ### Pré-requisitos
-1.  Python 3.12 ou superior instalado.
-2.  Uma chave de API válida para o Google Gemini AI.
+*   Sistema Operativo: Linux, macOS ou Windows.
+*   Python 3.10 ou superior.
+*   Chave de API Google Gemini válida.
 
-### Configuração
-1.  Clone o repositório.
-2.  Instale as dependências:
+### Passo a Passo
+
+1.  **Configurar Variáveis de Ambiente:**
+    Crie um ficheiro `.env` na raiz do projeto:
+    ```env
+    GEMINI_API_KEY=a_sua_chave_secreta_aqui
+    ```
+
+2.  **Instalar Dependências:**
     ```bash
     pip install -r requirements.txt
     ```
-3.  Crie um ficheiro `.env` na raiz do projeto:
-    ```env
-    GEMINI_API_KEY=a_sua_chave_aqui
+
+3.  **Executar o Servidor Web:**
+    Inicie o servidor de desenvolvimento do Django:
+    ```bash
+    python3 manage.py runserver
     ```
 
-### Execução
-Execute o ficheiro principal indicando a diretoria onde as imagens serão colocadas:
-
-```bash
-python main.py samples/
-```
-
-Ao colocar uma imagem (ex: `test.png`) na pasta `samples/`, o agente processará automaticamente o ficheiro e apresentará o resultado no terminal.
+4.  **Aceder à Aplicação:**
+    Abra o navegador e visite: `http://127.0.0.1:8000/`
 
 ---
 
-## 📚 Referências e Decisões Técnicas
-
-1.  **Modelo Gemini Flash:** A escolha de modelos da família "Flash" (ex: `gemini-1.5-flash` ou `gemini-3-flash-preview`) deve-se à sua otimização para tarefas de alta frequência e baixa latência, essenciais para sistemas de reconhecimento em tempo real. [Fonte: Google DeepMind Technical Reports].
-2.  **Multimodalidade:** A utilização de um modelo nativamente multimodal dispensa a necessidade de sistemas complexos de OCR ou segmentação de imagem prévia (como YOLO ou Tesseract), permitindo que um único modelo compreenda o contexto visual e semântico.
-3.  **JSON para Intercâmbio de Dados:** A utilização de JSON como formato padrão de saída do LLM facilita a integração programática com sistemas de *backend* tradicionais (como o ficheiro `picklist.json`).
+## 📝 Notas de Desenvolvimento
+*   O sistema não utiliza base de dados SQL tradicional; a persistência é feita via ficheiro JSON para simplicidade de demonstração.
+*   O *styling* utiliza CSS nativo com variáveis (`:root`) para facilitar a alteração do esquema de cores (atualmente configurado com o vermelho institucional).

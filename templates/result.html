@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if error %}
+        <h1>Unknown Item</h1>
+        <p style="font-size: 1.5rem;">{{ error }}</p>
+        <div class="upload-icon" style="color: #ccc;">?</div>
+    {% elif found %}
+        <div style="text-align: center;">
+            <div class="product-name">{{ best_match.fruit }}</div>
+            <div class="product-price">{{ best_match.Price }}€ <span style="font-size: 1rem; color: #666;">/kg</span></div>
+            <div class="plu-code">PLU: {{ best_match.PLU }}</div>
+            
+            <div style="margin-top: 30px; font-size: 1.2rem; color: green;">
+                Product Found
+            </div>
+        </div>
+    {% else %}
+        <h1>Unknown Item</h1>
+        <p style="font-size: 1.5rem;">Could not identify this item in our catalog.</p>
+        <div class="upload-icon" style="color: #ccc;">?</div>
+    {% endif %}
+
+    <div style="margin-top: 40px; font-size: 0.9rem; color: #999;">
+        Redirecting to home in <span id="countdown">10</span>s...
+    </div>
+    
+    <a href="{% url 'home' %}" class="btn" style="margin-top: 10px; padding: 10px 20px; font-size: 1rem; background-color: #ccc; color: #333;">New Weighing</a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let seconds = 10;
+    const countdownEl = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+        seconds--;
+        if (countdownEl) countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = "{% url 'home' %}";
+        }
+    }, 1000);
+</script>
+{% endblock %}
