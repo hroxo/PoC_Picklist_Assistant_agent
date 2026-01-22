@@ -81,12 +81,20 @@ def main() -> None:
 
     items_found = picklist_manager.cross_w_picklist(agent_output=agent_output)
 
-    if items_found != []:
+    if len(items_found) > 1:
+        final_list = picklist_manager.recall_w_picklist(agent,
+                                                        items_found)
+        print("List retrieved [✅]")
+        print(final_list,
+              f"Latency: {time.perf_counter() - latencia:.2f} seconds")
+
+    elif items_found is []:
+        print("Item not found")
+        print(f"\nDEBUG MESSAGE:\nAgent output:\n{agent_output}")
+    else:
         print("List retrieved [✅]")
         print(items_found,
               f"Latency: {time.perf_counter() - latencia:.2f} seconds")
-    else:
-        print("Item not found")
 
 
 if __name__ == "__main__":

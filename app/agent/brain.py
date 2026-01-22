@@ -18,7 +18,11 @@ class Agent:
             sys.exit(1)
         self.agent_model = agent_model
         self.prompt = prompt
+<<<<<<< HEAD:app/agent/brain.py
         self.image: bytes | None = None
+=======
+        self.image = None
+>>>>>>> origin/feat-recall:agent/brain.py
 
         try:
             load_dotenv()
@@ -51,6 +55,34 @@ class Agent:
             contents=[
                 types.Part.from_bytes(
                     data=self.image,
+<<<<<<< HEAD:app/agent/brain.py
+=======
+                    mime_type='image/png',
+                ),
+                self.prompt
+                ]
+            )
+
+        if response.text is None:
+            return "{\nError: Model Failed to run correctly\n}"
+
+        return response.text.replace("'", '"')
+
+    def recall(self, recall_prompt: str) -> str:
+        """
+        Docstring for recall
+        """
+        if self.image is None:
+            print("Error\nTo recall you have to call think prev\nExiting...")
+            exit
+
+        client = genai.Client(api_key=self.gemini_api_key)
+        response = client.models.generate_content(
+            model=self.agent_model,
+            contents=[
+                types.Part.from_bytes(
+                    data=self.image,
+>>>>>>> origin/feat-recall:agent/brain.py
                     mime_type='image/png',
                 ),
                 self.prompt

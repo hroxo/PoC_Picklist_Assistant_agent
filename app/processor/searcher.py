@@ -1,6 +1,10 @@
 import json
+<<<<<<< HEAD:app/processor/searcher.py
 import sys
 from app.agent.brain import Agent
+=======
+from agent.brain import Agent
+>>>>>>> origin/feat-recall:processor/searcher.py
 
 
 class PicklistManager:
@@ -50,6 +54,7 @@ class PicklistManager:
 
         return item_found
 
+<<<<<<< HEAD:app/processor/searcher.py
     def recall_w_picklist(self, agent: Agent, items_found: list) -> str:
         """
         Docstring for recall_w_picklist
@@ -64,3 +69,10 @@ class PicklistManager:
         new_output: str = agent.recall(new_prompt)
 
         return new_output
+=======
+    def recall_w_picklist(agent: Agent, items_found: list) -> str:
+        """
+        Docstring for recall_w_picklist
+        """
+       # escrever um prompt com os items found e chamar o agent.recall para escolher os items mais adequados e entregar a string
+>>>>>>> origin/feat-recall:processor/searcher.py
