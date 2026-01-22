@@ -1,6 +1,6 @@
 from processor.FileHandler import FileHandler
 from agent.brain import Agent
-from processor.searcher import cross_w_picklist
+from processor.searcher import PicklistManager
 import sys
 import time
 import os
@@ -77,8 +77,9 @@ def main() -> None:
 
     print("Analysing our Picklist for suggestion [✅]")
 
-    items_found = cross_w_picklist(picklist=picklist,
-                                   agent_output=agent_output)
+    picklist_manager = PicklistManager(picklist=picklist)
+
+    items_found = picklist_manager.cross_w_picklist(agent_output=agent_output)
 
     if items_found != []:
         print("List retrieved [✅]")

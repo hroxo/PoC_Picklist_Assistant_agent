@@ -1,7 +1,7 @@
 from processor.FileHandler import FileHandler
-from processor.searcher import cross_w_picklist
+from processor.searcher import PicklistManager
 
 __all__ = ["FileHandler",
-           "cross_w_picklist"]
+           "PicklistManager"]
 __version__ = "0.0.1"
 __author__ = "Hugo Roxo"
