@@ -9,8 +9,10 @@ from app.src.services.ai_service import AIService
 from app.src.services.matching_service import MatchingService
 from app.src.repositories.picklist_repository import PicklistRepository
 
+
 def home(request):
     return render(request, 'home.html')
+
 
 def classify(request):
     if request.method == 'POST' and request.FILES.get('image'):

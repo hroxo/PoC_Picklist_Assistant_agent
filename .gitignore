@@ -19,3 +19,6 @@ Thumbs.db
 # --- Configurações do Editor ---
 .vscode/
 .idea/
+
+# --- Bases de dados ---
+db.sqlite3
