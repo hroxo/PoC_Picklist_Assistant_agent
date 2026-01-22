@@ -1,4 +1,5 @@
 import json
+from agent.brain import Agent
 
 
 class PicklistManager:
@@ -47,3 +48,9 @@ class PicklistManager:
                 item_found.append(item)
 
         return item_found
+
+    def recall_w_picklist(agent: Agent, items_found: list) -> str:
+        """
+        Docstring for recall_w_picklist
+        """
+       # escrever um prompt com os items found e chamar o agent.recall para escolher os items mais adequados e entregar a string
