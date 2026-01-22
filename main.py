@@ -1,5 +1,5 @@
 from processor.FileHandler import FileHandler
-from agent.brain import agent
+from agent.brain import Agent
 from processor.searcher import cross_w_picklist
 import sys
 import time
@@ -22,12 +22,15 @@ def main() -> None:
 
     load_dotenv()
     prompt_path = os.getenv("PROMPT")
+
     if prompt_path is None:
         print("Error\nMake sure you have the correct path to the Prompt in your .env file")
         return
     else:
         str(prompt_path)
     print("Path to PROMPT [✅]")
+
+    agent = Agent(agent_model='gemini-3-flash-preview', prompt=prompt_path)
 
     try:
         path: str = sys.argv[1]
@@ -53,7 +56,7 @@ def main() -> None:
         print("Error at Watching File")
         return
 
-    latencia = time.perf_counter() # Latencia de processamento
+    latencia = time.perf_counter()  # Latencia de processamento
 
     with open(image, "rb") as file:
         print("Asked Agent for classification [✅]")
@@ -62,9 +65,7 @@ def main() -> None:
 
         while True:
             try:
-                agent_output = agent(image_read,
-                                     agent_model='gemini-3-flash-preview',
-                                     prompt=prompt_path)
+                agent_output = agent.think(image_read)
                 break
             except Exception as e:
                 print(f"Error {e}\nTrying again")

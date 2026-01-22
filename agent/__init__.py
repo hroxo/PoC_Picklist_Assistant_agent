@@ -1,5 +1,5 @@
-from agent.brain import agent
+from agent.brain import Agent
 
-__all__ = ["agent"]
+__all__ = ["Agent"]
 __version__ = "0.0.1"
 __author__ = "Hugo Roxo"
