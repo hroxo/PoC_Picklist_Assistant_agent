@@ -1,4 +1,6 @@
 import json
+import sys
+from app.agent.brain import Agent
 
 
 class PicklistManager:
@@ -15,7 +17,7 @@ class PicklistManager:
 
         except Exception as e:
             print(f"Error picklist_json\n{e}\nNot able to read string to json\nExiting...")
-            exit
+            sys.exit(1)
 
         self.picklist = picklist_json
 
@@ -47,3 +49,18 @@ class PicklistManager:
                 item_found.append(item)
 
         return item_found
+
+    def recall_w_picklist(self, agent: Agent, items_found: list) -> str:
+        """
+        Docstring for recall_w_picklist
+        """
+
+        new_prompt: str = (
+            f"Re-examine the image. Select the best matching JSON from the provided list "
+            f"(confidence threshold: 0.95). Return ONLY the JSON object.\n\n"
+            f"List: {items_found}"
+        )
+
+        new_output: str = agent.recall(new_prompt)
+
+        return new_output

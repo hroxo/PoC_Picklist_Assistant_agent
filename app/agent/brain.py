@@ -1,3 +1,4 @@
+import sys
 import os
 from dotenv import load_dotenv
 from google import genai
@@ -14,9 +15,16 @@ class Agent:
                 prompt = file.read()
         except Exception as e:
             print(f"Error {e}\nVerify path to prompt. Terminating script")
-            exit
+            sys.exit(1)
         self.agent_model = agent_model
         self.prompt = prompt
+        self.image: bytes | None = None
+
+        try:
+            load_dotenv()
+            self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        except Exception as e:
+            print(f"Error {e}\nGemini key missing or invalid.\nExiting...")
 
     def think(self, image_bytes: bytes) -> str:
         """
@@ -35,20 +43,45 @@ class Agent:
                 containing inventory details, or an error message JSON if the
                 model fails to generate text.
         """
-        load_dotenv()
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        self.image = image_bytes
 
-        client = genai.Client(api_key=gemini_api_key)
+        client = genai.Client(api_key=self.gemini_api_key)
         response = client.models.generate_content(
             model=self.agent_model,
             contents=[
                 types.Part.from_bytes(
-                    data=image_bytes,
+                    data=self.image,
                     mime_type='image/png',
                 ),
                 self.prompt
                 ]
             )
+
+        if response.text is None:
+            return "{\nError: Model Failed to run correctly\n}"
+
+        return response.text.replace("'", '"')
+
+    def recall(self, recall_prompt: str) -> str:
+        """
+        Docstring for recall
+        """
+        try:
+            client = genai.Client(api_key=self.gemini_api_key)
+            response = client.models.generate_content(
+                model=self.agent_model,
+                contents=[
+                    types.Part.from_bytes(
+                        data=self.image,
+                        mime_type='image/png',
+                    ),
+                    recall_prompt
+                    ]
+                )
+        except Exception as e:
+            print(f"Error {e}\nTo recall you have to call think prev",
+                  "\nExiting...")
+            sys.exit(1)
 
         if response.text is None:
             return "{\nError: Model Failed to run correctly\n}"
